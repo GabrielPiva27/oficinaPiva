@@ -12,18 +12,19 @@ document.getElementById('formCliente')
     if (document.getElementById('carro').value.length < 2) {
         alerta('<i class="bi bi-exclamation-octagon"></i> O nome é muito curto!', 'warning')
         document.getElementById('carro').focus()
-    } else if (document.getElementById('carro').value.length > 30) {
+    } else if (document.getElementById('carro').value.length > 50) {
         alerta('<i class="bi bi-exclamation-octagon"></i> O nome é muito longo!', 'warning')
         document.getElementById('carro').focus()
     }
 
     const dadosCliente = {
+        placa: document.getElementById('placa').value,
+        carro: document.getElementById('carro').value,
+        anoCarro: document.getElementById('anoCarro').value,
         nome: document.getElementById('nome').value,
         cpf: document.getElementById('cpf').value,
         email: document.getElementById('email').value,
-        telefone: document.getElementById('telefone').value,
-        carro: document.getElementById('carro').value,
-        placa: document.getElementById('placa').value
+        telefone: document.getElementById('telefone').value
     }
 
     if (document.getElementById('id').value !== '') {
@@ -68,12 +69,13 @@ async function obtemClientes() {
       tabela.innerHTML = ''
       tabela.innerHTML += `
               <tr class='darkTable'>
+                <th>PLaca</th>
+                <th>Carro</th>
+                <th>Ano do Carro</th>
                 <th>Nome</th>
                 <th>CPF</th>
                 <th>Email</th>
-                <th>Telefone</th>
-                <th>Carro</th>
-                <th>PLaca</th>
+                <th>Telefone</th>                
               </tr>
       `
       snapshot.forEach(item => {
@@ -82,12 +84,13 @@ async function obtemClientes() {
         let id = item.ref._delegate._path.pieces_[1] //id do registro
         //Criando as novas linhas da tabela
         let novaLinha = tabela.insertRow() //insere uma nova linha na tabela
+        novaLinha.insertCell().textContent = item.val().placa
+        novaLinha.insertCell().textContent = item.val().carro
+        novaLinha.insertCell().textContent = item.val().anoCarro
         novaLinha.insertCell().textContent = item.val().nome
         novaLinha.insertCell().textContent = item.val().cpf
         novaLinha.insertCell().textContent = item.val().email
-        novaLinha.insertCell().textContent = item.val().telefone
-        novaLinha.insertCell().textContent = item.val().carro
-        novaLinha.insertCell().textContent = item.val().placa
+        novaLinha.insertCell().textContent = item.val().telefone        
         novaLinha.insertCell().innerHTML = `<button class='btn btn-sm btn-danger' title='Apaga o cliente selecionado' onclick=remover('${db}','${id}')> <i class='bi bi-trash'></i> </button>
                                             <button class='btn btn-sm btn-warning' title='Edita o cliente selecionado' onclick=carregaDadosAlteracao('${db}','${id}')> <i class='bi bi-pencil-square'></i> </button>`
       })
@@ -113,12 +116,13 @@ async function remover(db, id) {
 async function carregaDadosAlteracao(db, id) {
     await firebase.database().ref(db + '/' + id).on('value', (snapshot) => {
       document.getElementById('id').value = id
+      document.getElementById('carro').value = snapshot.val().carro
+      document.getElementById('placa').value = snapshot.val().placa
+      document.getElementById('carro').value = snapshot.val().anoCarro
       document.getElementById('nome').value = snapshot.val().nome
       document.getElementById('cpf').value = snapshot.val().cpf
       document.getElementById('email').value = snapshot.val().email
       document.getElementById('telefone').value = snapshot.val().telefone
-      document.getElementById('carro').value = snapshot.val().carro
-      document.getElementById('placa').value = snapshot.val().placa
     })
     document.getElementById('nome').focus() //Foco no campo nome
 }
