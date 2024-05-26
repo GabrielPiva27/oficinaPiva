@@ -112,18 +112,18 @@
             <!-- Valor do Serviço -->
             <div class="input-group mb-3">
               <span class="input-group-text">R$</span>
-              <input type="number" class="form-control" aria-label="Amount (to the nearest dollar)" id="valorServico" placeholder="Valor do serviço">
+              <input type="number" class="form-control" aria-label="Amount (to the nearest dollar)" id="valorServico" placeholder="Valor do serviço" min="0.01" step="0.01">
             </div>
 
             <!-- Ckeckbox -->
             <div class="form-check">
-              <input class="form-check-input" type="radio" name="servicoAtivo" id="servicoAtivo" checked>
+              <input class="form-check-input" type="radio" name="statusServico" id="servicoAtivo" checked>
               <label class="form-check-label" for="servicoAtivo">
                 Serviço em andamento
               </label>
             </div>
             <div class="form-check">
-              <input class="form-check-input" type="radio" name="carroEntregue" id="carroEntregue">
+              <input class="form-check-input" type="radio" name="statusServico" id="carroEntregue">
               <label class="form-check-label" for="carroEntregue">
                 Carro Entregue
               </label>

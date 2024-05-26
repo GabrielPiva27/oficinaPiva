@@ -93,13 +93,13 @@
               </div>
               <!-- Quantidade -->
               <div class="form-floating mb-2">
-                <input type="number" class="form-control" id="qtde" placeholder="Quantidade" required>
+                <input type="number" class="form-control" id="qtde" placeholder="Quantidade" min="0" required>
                 <label for="qtde">Quantidade</label>
               </div>
               <!-- Valor da Peça -->
               <div class="input-group mb-3">
                 <span class="input-group-text">R$</span>
-                <input type="number" class="form-control" aria-label="Amount (to the nearest dollar)" id="valorPeca" placeholder="Valor unitário da peça">
+                <input type="number" class="form-control" aria-label="Amount (to the nearest dollar)" id="valorPeca" placeholder="Valor unitário da peça" min="0.01" step="0.01">
               </div>
             </form>
           </div>
