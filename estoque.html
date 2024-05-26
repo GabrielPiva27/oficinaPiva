@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Oficina Piva</title>
+  <!-- Bootstrap -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
+    integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous" />
+  <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.min.js"
+    integrity="sha384-BBtl+eGJRgqQAUMxJ7pMwbEyER4l1g+O15P+16Ep7Q9Q+zqX6gSbd85u4mG4QzX+"
+    crossorigin="anonymous"></script>
+  <!-- Boostrap Icons -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
+  <!-- CSS -->
+  <link rel="stylesheet" href="css/estilo.css">
+</head>
+
+<body onload="verificaLogado()">
+  <!-- Barra de Navegação -->
+  <nav class="navbar navbar-expand-lg bg-body-tertiary">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="home.html"><i class="bi bi-tools"></i> Oficina Piva</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent"
+        aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+          <li class="nav-item">
+            <a class="nav-link active" aria-current="page" href="home.html"><i class="bi bi-house"></i> Home</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="cliente.html"><i class="bi bi-car-front"></i> Clientes</a>
+          </li>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="estoque.html"><i class="bi bi-archive"></i> Estoque</a>
+          </li>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="orcamento.html"><i class="bi bi-cash-coin"></i> Orçamentos</a>
+          </li>
+        </ul>
+      </div>
+      <div class="text-right">
+        <ul class="navbar-nav ms-auto flex-nowrap">
+          <div id="imagemUsuario"></div>
+          <li class="nav-item">
+            <button class="btn btn-sm btn-block btn-danger" onclick="logoutFirebase()">
+              <i class="bi bi-box-arrow-in-left"></i> Logout
+            </button>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Cabeçalho do Formulário -->
+  <div class="container-fluid p-2 bg-secondary text-light text-center">
+    <h3><i class="bi bi-gear-wide-connected"></i> Controle de Estoque <i class="bi bi-nut"></i></h3>
+  </div>
+  <div id="mensagemAlerta"></div>
+
+  <div class="container-fluid">
+    <div class="row">
+      <div class="col-md-3">
+        <div class="card-header">
+          <h4 class="card-title text-dark">
+            Estoque
+          </h4>
+        </div>
+        <div class="card shadow-lg rounded">
+          <div class="card-body">
+            <!-- Formulário -->
+            <form class="form-horizontal" id="formEstoque">
+              <!-- Código -->
+              <div>
+                <input type="text" class="form-control" id="codigo" placeholder="Código do item" disabled readonly>
+                <label for="codigo"></label>
+              </div>
+              <!-- Peça -->
+              <div class="form-floating mb-2">
+                <input type="text" class="form-control" id="peça" placeholder="Digite o nome da peça" required>
+                <label for="nome">Peça</label>
+              </div>
+              <!-- Modelo -->
+              <div class="form-floating mb-2">
+                <input type="text" class="form-control" id="modelo" placeholder="Modelo da peça">
+                <label for="modelo">Modelo</label>
+              </div>
+              <!-- Quantidade -->
+              <div class="form-floating mb-2">
+                <input type="number" class="form-control" id="qtde" placeholder="Quantidade" required>
+                <label for="qtde">Quantidade</label>
+              </div>
+              <!-- Valor da Peça -->
+              <div class="input-group mb-3">
+                <span class="input-group-text">R$</span>
+                <input type="number" class="form-control" aria-label="Amount (to the nearest dollar)" id="valorPeca" placeholder="Valor unitário da peça">
+              </div>
+            </form>
+          </div>
+          <div class="form-group">
+            <label class="col-md-4 control-label" for="salvar"></label>
+            <div class="col-md-8">
+              <button type="submit" id="salvar" name="salvar" class="btn btn-secondary"><i class="bi bi-save"></i>
+                Salvar</button>
+              <button type="reset" id="limpar" name="limpar" class="btn btn-warning"><i class="bi bi-x-circle"></i>
+                Limpar</button>
+            </div>
+          </div>
+
+        </div>
+      </div>
+      <div class="col-md-8">
+        <button class="btn btn-secondary" type="button"disabled id="carregandoEstoque">
+          <span class="spinner-border spinner-border-sm text-dark" role="status"></span> Carregando os dados...
+        </button>
+        <!-- campo de filtro -->
+        <div class="form-group mt-3">
+          <input type="text" class="form-control" id="filtroCliente" placeholder="🔍 Filtrar..."
+            oninput="filtrarTabela('filtroCliente','tabelaDados')">
+        </div>
+        <!-- tabela -->
+        <table class="table table-bordered table-striped darkTable" id="tabelaEstoque">
+          <!-- conteúdo obtido no Firebase será inserido aqui -->
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <footer class="bd-footer py-1 bg-secondary text-light fixed-bottom">
+    <div class="container py-1">
+      <div class="row">
+        <div class="col-md-6">
+          <p>Oficina Piva &copy; - Todos os direitos reservados</p>
+        </div>
+      </div>
+    </div>
+  </footer>
+  <!-- Carregando os scripts do Firebase -->
+  <script src="https://www.gstatic.com/firebasejs/9.6.7/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.7/firebase-database-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.7/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.7/firebase-storage-compat.js"></script>
+  <!-- Carregamento dos scripts do projeto -->
+  <script src="js/firebase/firebase.js"></script>
+  <script src="js/firebase/autenticacao.js"></script>
+  <script src="js/util/alerta.js"></script>
+  <script src="js/firebase/estoque.js"></script>
+</body>
+
+</html>
