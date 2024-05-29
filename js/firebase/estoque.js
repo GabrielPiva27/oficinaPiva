@@ -1,112 +1,108 @@
 document.getElementById('formEstoque')
   .addEventListener('submit', function (event) {
     event.preventDefault()
-    //validações
-    if (document.getElementById('qtde').value < 0) {
-      alerta('<i class="bi bi-exclamation-octagon"></i> Favor inserir um número positivo!', 'warning')
-      document.getElementById('nome').focus()
-    } else {
-        return
-    }
+        
+    //criando o objeto cliente
 
     const dadosEstoque = {
-        item: document.getElementById('item').value,
-        modelo: document.getElementById('modelo').value,
-        quantidede: document.getElementById('qtde').value,
-        valorPeca: document.getElementById('valorPeca').value
+      peca: document.getElementById('peca').value,
+      modelo: document.getElementById('modelo').value,
+      qtde: document.getElementById('qtde').value,
+      valorPeca: document.getElementById('valorPeca').value
     }
 
     if (document.getElementById('id').value !== '') {
-        alterar(event, 'estoques', dadosEstoque, document.getElementById('id').value)
-      } else {
-        incluir(event, 'estoques', dadosEstoque)
+      alterar(event, 'estoques', dadosEstoque, document.getElementById('id').value)
+    } else {
+      incluir(event, 'estoques', dadosEstoque)
     }
-})
+  })
 
-//Botão de salvar
+//Salvar
 async function incluir(event, collection, dados) {
-    event.preventDefault()
-    return await firebase.database().ref(collection).push(dados)
-      .then(() => {
-        alerta('<i class="bi bi-check-circle"></i> Item incluído com sucesso!', 'success')
-        document.getElementById('formEstoque').reset()
-      })
-      .catch(error => {
-        alerta('<i class="bi bi-x-circle"></i> Falha ao incluir: ' + error.message, 'danger')
-      })
+  event.preventDefault()
+  return await firebase.database().ref(collection).push(dados)
+    .then(() => {
+      alerta('<i class="bi bi-check-circle"></i> Registro incluído com sucesso!', 'success')
+      document.getElementById('formEstoque').reset()
+    })
+    .catch(error => {
+      alerta('<i class="bi bi-exclamation-circle"></i> Falha ao incluir: ' + error.message, 'danger')
+    })
 }
 
-//Botão de editar
+//Editar
 async function alterar(event, collection, dados, id) {
-    event.preventDefault()
-    return await firebase.database().ref().child(collection + '/' + id).update(dados)
-      .then(() => {
-        alerta('<i class="bi bi-check-circle"></i> Item alterado com sucesso!', 'success')
-        document.getElementById('formEstoque').reset()//limpa
-      })
-      .catch(error => {
-        alerta('<i class="bi bi-x-circle"></i> Falha ao alterar: ' + error.message, 'danger')
-      })
+  event.preventDefault()
+  return await firebase.database().ref().child(collection + '/' + id).update(dados)
+    .then(() => {
+      alerta('<i class="bi bi-check-circle"></i> Registro alterado com sucesso!', 'success')
+      document.getElementById('formEstoque').reset()
+    })
+    .catch(error => {
+      alerta('<i class="bi bi-exclamation-circle"></i> Falha ao alterar: ' + error.message, 'danger')
+    })
 }
 
 //Tabela
 async function obtemEstoque() {
-    let spinner = document.getElementById('carregandoEstoque')
-    let tabela = document.getElementById('tabelaEstoque')
-  
-    await firebase.database().ref('estoques').orderByChild('item').on('value', (snapshot) => {
-      tabela.innerHTML = ''
-      tabela.innerHTML += `
-              <tr class='darkTable'>
-                <th>Peça</th>
-                <th>Modelo</th>
-                <th>Quantidade</th>
-                <th>Valor da Peça</th>
-              </tr>
-      `
-      snapshot.forEach(item => {
-        //Dados do Firebase
-        let db = item.ref._delegate._path.pieces_[0] //nome da collection
-        let id = item.ref._delegate._path.pieces_[1] //id do registro
-        //Criando as novas linhas da tabela
-        let novaLinha = tabela.insertRow() //insere uma nova linha na tabela
-        novaLinha.insertCell().textContent = item.val().item
-        novaLinha.insertCell().textContent = item.val().modelo
-        novaLinha.insertCell().textContent = item.val().quantidade
-        novaLinha.insertCell().textContent = item.val().valorPeca
-        novaLinha.insertCell().innerHTML = `<button class='btn btn-sm btn-danger' title='Apaga o cliente selecionado' onclick=remover('${db}','${id}')> <i class='bi bi-trash'></i> </button>
-                                            <button class='btn btn-sm btn-warning' title='Edita o cliente selecionado' onclick=carregaDadosAlteracao('${db}','${id}')> <i class='bi bi-pencil-square'></i> </button>`
-      })
+  let spinner = document.getElementById('carregandoEstoque')
+  let tabela = document.getElementById('tabelaEstoque')
+
+  await firebase.database().ref('estoques').orderByChild('peca').on('value', (snapshot) => {
+    tabela.innerHTML = ''
+    tabela.innerHTML += `
+            <tr class='darkTable'>
+              <th>Peça</th>   
+              <th>Modelo</th>   
+              <th>Quantidade</th>
+              <th>Valor da Peça</th>
+            </tr>
+    `
+    snapshot.forEach(item => {
+      //Dados do Firebase
+      let db = item.ref._delegate._path.pieces_[0] //nome da collection
+      let id = item.ref._delegate._path.pieces_[1] //id do registro
+      //Criando as novas linhas da tabela
+      let novaLinha = tabela.insertRow() //insere uma nova linha na tabela
+      novaLinha.insertCell().textContent = item.val().peca
+      novaLinha.insertCell().textContent = item.val().modelo
+      novaLinha.insertCell().textContent = item.val().qtde
+      novaLinha.insertCell().textContent = item.val().valorPeca
+      novaLinha.insertCell().innerHTML = `<button class='btn btn-sm btn-danger' title='Apaga o registro selecionado' onclick=remover('${db}','${id}')> <i class='bi bi-trash'></i> </button>
+                                          <button class='btn btn-sm btn-warning' title='Edita o registro selecionado' onclick=carregaDadosAlteracao('${db}','${id}')> <i class='bi bi-pencil-square'></i> </button>`
     })
-    spinner.classList.add('d-none')
+  })
+  spinner.classList.add('d-none')
 }
 
-//Apagar
+//Botão Apagar da tabela
 async function remover(db, id) {
-    if (window.confirm('<i class="bi bi-exclamation-circle"></i> Confirma a exclusão do Item?')) {
-      let dadosExclusao = await firebase.database().ref().child(db + '/' + id)
-      dadosExclusao.remove()
-        .then(() => {
-          alerta('<i class="bi bi-check-circle"></i> Item removido com sucesso!', 'success')
-        })
-        .catch(error => {
-          alerta(`<i class="bi bi-x-circle"></i> Falha ao apagar o Item: ${error.message}`)
-        })
-    }
+  if (window.confirm('⚠️ Confirma a exclusão do registro?')) {
+    let dadosExclusao = await firebase.database().ref().child(db + '/' + id)
+    dadosExclusao.remove()
+      .then(() => {
+        alerta('<i class="bi bi-check-circle"></i> Registro removido com sucesso!', 'success')
+      })
+      .catch(error => {
+        alerta(`<i class="bi bi-exclamation-circle"></i> Falha ao apagar o registro: ${error.message}`)
+      })
+  }
 }
 
-//editar
+//Botão Editar da tabela
 async function carregaDadosAlteracao(db, id) {
-    await firebase.database().ref(db + '/' + id).on('value', (snapshot) => {
-      document.getElementById('id').value = id
-      document.getElementById('item').value = snapshot.val().item
-      document.getElementById('modelo').value = snapshot.val().modelo
-      document.getElementById('qtde').value = snapshot.val().quantidade
-    })
-    document.getElementById('Item').focus() //Foco no campo nome
+  await firebase.database().ref(db + '/' + id).on('value', (snapshot) => {
+    document.getElementById('id').value = id
+    document.getElementById('peca').value = snapshot.val().peca
+    document.getElementById('modelo').value = snapshot.val().modelo
+    document.getElementById('qtde').value = snapshot.val().qtde
+    document.getElementById('valorPeca').value = snapshot.val().valorPeca
+  })
+  document.getElementById('peca').focus() //foco no campo peça
 }
 
-//Filtro
+//Função Filtro
 function filtrarTabela(idFiltro, idTabela) {
     // Obtém os elementos HTML
     var input = document.getElementById(idFiltro); // Input de texto para pesquisa

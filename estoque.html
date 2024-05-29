@@ -18,7 +18,7 @@
   <link rel="stylesheet" href="css/estilo.css">
 </head>
 
-<body onload="verificaLogado()">
+<body onload="verificaLogado(); obtemEstoque()">
   <!-- Barra de Navegação -->
   <nav class="navbar navbar-expand-lg bg-body-tertiary">
     <div class="container-fluid">
@@ -78,13 +78,13 @@
             <form class="form-horizontal" id="formEstoque">
               <!-- Código -->
               <div>
-                <input type="text" class="form-control" id="codigo" placeholder="Código do item" disabled readonly>
-                <label for="codigo"></label>
+                <input type="text" class="form-control" id="id" placeholder="Código do item" disabled readonly>
+                <label for="id"></label>
               </div>
               <!-- Peça -->
               <div class="form-floating mb-2">
-                <input type="text" class="form-control" id="peça" placeholder="Digite o nome da peça" required>
-                <label for="nome">Peça</label>
+                <input type="text" class="form-control" id="peca" placeholder="Digite o nome da peça" required>
+                <label for="peca">Peça</label>
               </div>
               <!-- Modelo -->
               <div class="form-floating mb-2">
@@ -101,18 +101,18 @@
                 <span class="input-group-text">R$</span>
                 <input type="number" class="form-control" aria-label="Amount (to the nearest dollar)" id="valorPeca" placeholder="Valor unitário da peça" min="0.01" step="0.01">
               </div>
+              <!-- Botão Salvar e Limpar -->
+              <div class="form-group">
+                <label class="col-md-4 control-label" for="salvar"></label>
+                <div class="col-md-8">
+                  <button type="submit" id="salvar" name="salvar" class="btn btn-secondary"><i class="bi bi-save"></i>
+                    Salvar</button>
+                  <button type="reset" id="limpar" name="limpar" class="btn btn-warning"><i class="bi bi-x-circle"></i>
+                    Limpar</button>
+                </div>
+              </div>
             </form>
           </div>
-          <div class="form-group">
-            <label class="col-md-4 control-label" for="salvar"></label>
-            <div class="col-md-8">
-              <button type="submit" id="salvar" name="salvar" class="btn btn-secondary"><i class="bi bi-save"></i>
-                Salvar</button>
-              <button type="reset" id="limpar" name="limpar" class="btn btn-warning"><i class="bi bi-x-circle"></i>
-                Limpar</button>
-            </div>
-          </div>
-
         </div>
       </div>
       <div class="col-md-8">
@@ -122,7 +122,7 @@
         <!-- campo de filtro -->
         <div class="form-group mt-3">
           <input type="text" class="form-control" id="filtroCliente" placeholder="🔍 Filtrar..."
-            oninput="filtrarTabela('filtroCliente','tabelaDados')">
+            oninput="filtrarTabela('filtroCliente','tabelaEstoque')">
         </div>
         <!-- tabela -->
         <table class="table table-bordered table-striped darkTable" id="tabelaEstoque">

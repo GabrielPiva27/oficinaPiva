@@ -2,13 +2,7 @@ document.getElementById('formOrcamento')
     .addEventListener('submit', function (event) {
         event.preventDefault()
         //validações
-        if (document.getElementById('valorServico').value < 0) {
-            alerta('<i class="bi bi-exclamation-octagon"></i> Favor inserir um número positivo!', 'warning')
-            document.getElementById('nome').focus()
-        } else {
-            return
-        }
-
+        
         let statusServico = ''
         if (document.getElementById('servicoAtivo').checked) {
             statusServico = 'Serviço em andamento'
@@ -16,17 +10,18 @@ document.getElementById('formOrcamento')
 
         const dadosServico = {
             placa: document.getElementById('placa').value,
+            carro: document.getElementById('carro').value,
             nome: document.getElementById('nome').value,
             data: document.getElementById('data').value,
-            descricaoServico: document.getElementById('descricaoServico').value,
+            servicosRealizados: document.getElementById('servicosRealizados').value,
             valorServico: document.getElementById('valorServico').value,
-            Servico: statusServico
+            servico: statusServico
         }
 
         if (document.getElementById('id').value !== '') {
-            alterar(event, 'servicos', dadosServico, document.getElementById('id').value)
+            alterar(event, 'orcamentos', dadosServico, document.getElementById('id').value)
         } else {
-            incluir(event, 'servicos', dadosServico)
+            incluir(event, 'orcamentos', dadosServico)
         }
     })
 
@@ -49,7 +44,7 @@ async function alterar(event, collection, dados, id) {
     return await firebase.database().ref().child(collection + '/' + id).update(dados)
         .then(() => {
             alerta('<i class="bi bi-check-circle"></i> Serviço alterado com sucesso!', 'success')
-            document.getElementById('formOrcamento').reset()//limpa
+            document.getElementById('formOrcamento').reset()
         })
         .catch(error => {
             alerta('<i class="bi bi-x-circle"></i> Falha ao alterar: ' + error.message, 'danger')
@@ -57,11 +52,11 @@ async function alterar(event, collection, dados, id) {
 }
 
 //Tabela
-async function obtemEstoque() {
+async function obtemServico() {
     let spinner = document.getElementById('carregandoServico')
     let tabela = document.getElementById('tabelaServico')
 
-    await firebase.database().ref('servicos').orderByChild('placa').on('value', (snapshot) => {
+    await firebase.database().ref('orcamentos').orderByChild('placa').on('value', (snapshot) => {
         tabela.innerHTML = ''
         tabela.innerHTML += `
               <tr class='darkTable'>
@@ -69,8 +64,8 @@ async function obtemEstoque() {
                 <th>Carro</th>
                 <th>Nome</th>
                 <th>Data</th>
-                <th>Descrição do Serviço</th>
-                <th>Valor do Serviço</th>
+                <th>Serviços Realizados</th>
+                <th>Valor Total</th>
                 <th>Status do Serviço</th>
               </tr>
       `
@@ -84,11 +79,11 @@ async function obtemEstoque() {
             novaLinha.insertCell().textContent = item.val().carro
             novaLinha.insertCell().textContent = item.val().nome
             novaLinha.insertCell().textContent = item.val().data
-            novaLinha.insertCell().textContent = item.val().descricaoServico
+            novaLinha.insertCell().textContent = item.val().servicosRealizados
             novaLinha.insertCell().textContent = item.val().valorServico
             novaLinha.insertCell().textContent = item.val().servico
             novaLinha.insertCell().innerHTML = `<button class='btn btn-sm btn-danger' title='Apaga o cliente selecionado' onclick=remover('${db}','${id}')> <i class='bi bi-trash'></i> </button>
-                                            <button class='btn btn-sm btn-warning' title='Edita o cliente selecionado' onclick=carregaDadosAlteracao('${db}','${id}')> <i class='bi bi-pencil-square'></i> </button>`
+                                                <button class='btn btn-sm btn-warning' title='Edita o cliente selecionado' onclick=carregaDadosAlteracao('${db}','${id}')> <i class='bi bi-pencil-square'></i> </button>`
         })
     })
     spinner.classList.add('d-none')
@@ -96,7 +91,7 @@ async function obtemEstoque() {
 
 //Apagar
 async function remover(db, id) {
-    if (window.confirm('<i class="bi bi-exclamation-circle"></i> Confirma a exclusão do Item?')) {
+    if (window.confirm('⚠️ Confirma a exclusão do orçamento?')) {
         let dadosExclusao = await firebase.database().ref().child(db + '/' + id)
         dadosExclusao.remove()
             .then(() => {
@@ -116,18 +111,18 @@ async function carregaDadosAlteracao(db, id) {
         document.getElementById('carro').value = snapshot.val().carro
         document.getElementById('nome').value = snapshot.val().nome
         document.getElementById('data').value = snapshot.val().data
-        document.getElementById('descricaoServico').value = snapshot.val().descricaoServico
+        document.getElementById('servicosRealizados').value = snapshot.val().servicosRealizados
         document.getElementById('valorServico').value = snapshot.val().valorServico
         if (snapshot.val().servico === 'Serviço em andamento') {
             document.getElementById('servicoAtivo').checked = true
-        } else {
+          } else {
             document.getElementById('carroEntregue').checked = true
-        }
+          }
     })
     document.getElementById('placa').focus() //Foco no campo placa
 }
 
-//Filtro
+//Função Filtro
 function filtrarTabela(idFiltro, idTabela) {
     // Obtém os elementos HTML
     var input = document.getElementById(idFiltro); // Input de texto para pesquisa
@@ -157,3 +152,93 @@ function filtrarTabela(idFiltro, idTabela) {
         }
     }
 }
+
+// Carrega Clientes
+async function carregaClientes() {
+    let combo = document.getElementById('placa')
+    await firebase.database().ref('clientes').orderByChild('placa').on('value', (snapshot) => {
+        combo.innerHTML = ''
+        combo.innerHTML += `<select name='placa' id='placa' class='form-control'>`
+        snapshot.forEach(item => {
+            combo.innerHTML += `<option value='${item.val().placa}'>${item.val().placa.toUpperCase()} - ${item.val().carro.toUpperCase()}</option>`
+        })
+    })
+    combo.innerHTML += `</select>`
+}
+
+document.getElementById('placa')
+    .addEventListener('change', function (event) {
+        let placa = document.getElementById("placa").value
+        carregaClientePorPlaca(placa)
+    })
+
+async function carregaClientePorPlaca(placa) {
+    // Supondo que 'placa' seja a placa do cliente que você quer buscar
+    let clienteEncontrado = null
+    // Consulta ao banco de dados buscando clientes com a placa específica
+    await firebase.database().ref('clientes').orderByChild('placa').equalTo(placa).once('value', (snapshot) => {
+        snapshot.forEach(item => {
+            clienteEncontrado = item.val()
+            document.getElementById("carro").value = item.val().carro.toUpperCase()
+            document.getElementById("nome").value = item.val().nome.toUpperCase()
+        })
+    });
+    return clienteEncontrado
+}
+
+//Adicionar o serviço
+document.getElementById('inserirServ').addEventListener('click', function () {
+    var servicoUsado = document.getElementById('servicos').value;
+    var textarea = document.getElementById('servicosRealizados');
+    textarea.value += (textarea.value ? '\n' : '') + servicoUsado;
+});
+
+document.getElementById('inserirServ').addEventListener('click', function() {
+    var selectedValue = document.getElementById('servicos').value;
+    var container = document.getElementById('listaServicos');
+    
+    // Cria um novo div para armazenar o serviço e o botão de apagar
+    var newDiv = document.createElement('div');
+    newDiv.classList.add('input-group', 'mb-2');
+
+    // Cria um input text para mostrar o serviço selecionado
+    var newText = document.createElement('input');
+    newText.type = 'text';
+    newText.classList.add('form-control');
+    newText.value = selectedValue;
+    newText.readOnly = true;
+
+    // Cria um botão de apagar
+    var deleteButton = document.createElement('button');
+    deleteButton.classList.add('btn', 'btn-danger');
+    deleteButton.textContent = 'Apagar';
+    deleteButton.addEventListener('click', function() {
+      container.removeChild(newDiv);
+    });
+
+    // Agrupa o botão de apagar com o input text
+    var inputGroupAppend = document.createElement('div');
+    inputGroupAppend.classList.add('input-group-append');
+    inputGroupAppend.appendChild(deleteButton);
+
+    // Adiciona o input text e o grupo de botões ao div
+    newDiv.appendChild(newText);
+    newDiv.appendChild(inputGroupAppend);
+    container.appendChild(newDiv);
+  });
+
+  // Salvar opções no textarea
+  document.getElementById('inserirServ').addEventListener('click', function() {
+    var container = document.getElementById('listaServicos');
+    var inputs = container.getElementsByTagName('input');
+    var resultTextarea = document.getElementById('servicosRealizados');
+    var values = [];
+
+    // Coleta todos os valores dos inputs e os adiciona ao array
+    for (var i = 0; i < inputs.length; i++) {
+      values.push(inputs[i].value);
+    }
+
+    // Adiciona os valores ao textarea, cada um em uma nova linha
+    resultTextarea.value = values.join('\n');
+  });

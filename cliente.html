@@ -18,7 +18,7 @@
   <link rel="stylesheet" href="css/estilo.css">
 </head>
 
-<body onload="verificaLogado()">
+<body onload="verificaLogado();obtemClientes()">
   <!-- Barra de Navegação -->
   <nav class="navbar navbar-expand-lg bg-body-tertiary">
     <div class="container-fluid">
@@ -78,12 +78,12 @@
             <form class="form-horizontal" id="formCliente">
               <!-- Código -->
               <div>
-                <input type="text" class="form-control" id="codigo" placeholder="Código do cliente" disabled readonly>
-                <label for="codigo"></label>
+                <input type="text" class="form-control" id="id" placeholder="Código do cliente" disabled readonly>
+                <label for="id"></label>
               </div>
               <!-- Placa do Carro -->
               <div class="form-floating mb-2">
-                <input type="text" class="form-control" id="placa" placeholder="AAA-0000" pattern="[A-Za-z]{3}-\d{4}"
+                <input type="text" class="form-control" id="placa" placeholder="AAA-0000" pattern="[A-Za-z]{3}-\d{A-Za-z0-9}"
                   maxlength="8" required>
                 <label for="placa">Placa do Veículo</label>
               </div>
@@ -94,7 +94,7 @@
               </div>
               <!-- Ano Carro -->
               <div class="form-floating mb-2">
-                <input type="number" class="form-control" id="anoCarro" placeholder="Ano do Carro" min="1990" max="2024" step="1" maxlength="4" required>
+                <input type="number" class="form-control" id="anoCarro" placeholder="Ano do Carro" min="01-01-1990" max="31-12-2025" step="1" maxlength="4" required>
                 <label for="anoCarro">Ano do Carro</label>
               </div>
               <!-- Nome -->
@@ -119,18 +119,18 @@
                   required>
                 <label for="telefone">Telefone</label>
               </div>
+              <!-- Botão Salvar e Limpar -->
+              <div class="form-group">
+                <label class="col-md-4 control-label" for="salvar"></label>
+                <div class="col-md-8">
+                  <button type="submit" id="salvar" name="salvar" class="btn btn-secondary"><i class="bi bi-save"></i>
+                    Salvar</button>
+                  <button type="reset" id="limpar" name="limpar" class="btn btn-warning"><i class="bi bi-x-circle"></i>
+                    Limpar</button>
+                </div>
+              </div>
             </form>
           </div>
-          <div class="form-group">
-            <label class="col-md-4 control-label" for="salvar"></label>
-            <div class="col-md-8">
-              <button type="submit" id="salvar" name="salvar" class="btn btn-secondary"><i class="bi bi-save"></i>
-                Salvar</button>
-              <button type="reset" id="limpar" name="limpar" class="btn btn-warning"><i class="bi bi-x-circle"></i>
-                Limpar</button>
-            </div>
-          </div>
-
         </div>
       </div>
       <div class="col-md-8">
@@ -140,11 +140,11 @@
         <!-- campo de filtro -->
         <div class="form-group mt-3">
           <input type="text" class="form-control" id="filtroCliente" placeholder="🔍 Filtrar..."
-            oninput="filtrarTabela('filtroCliente','tabelaDados')">
+            oninput="filtrarTabela('filtroCliente','tabelaCliente')">
         </div>
         <!-- tabela -->
         <table class="table table-bordered table-striped darkTable" id="tabelaCliente">
-          <!-- conteúdo obtido no Firebase será inserido aqui -->
+          <!-- Dados da Tabela -->
         </table>
       </div>
     </div>
@@ -173,52 +173,6 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.mask/1.14.16/jquery.mask.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>
   <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-  <script>
-    function validarCPF(cpf) {
-      cpf = cpf.replace(/[^\d]+/g, ''); // Remove caracteres não numéricos
-      if (cpf == '') return false;
-      if (cpf.length != 11 ||
-        cpf == "00000000000" ||
-        cpf == "11111111111" ||
-        cpf == "22222222222" ||
-        cpf == "33333333333" ||
-        cpf == "44444444444" ||
-        cpf == "55555555555" ||
-        cpf == "66666666666" ||
-        cpf == "77777777777" ||
-        cpf == "88888888888" ||
-        cpf == "99999999999")
-        return false;
-      let add = 0;
-      for (let i = 0; i < 9; i++)
-        add += parseInt(cpf.charAt(i)) * (10 - i);
-      let rev = 11 - (add % 11);
-      if (rev == 10 || rev == 11)
-        rev = 0;
-      if (rev != parseInt(cpf.charAt(9)))
-        return false;
-      add = 0;
-      for (let i = 0; i < 10; i++)
-        add += parseInt(cpf.charAt(i)) * (11 - i);
-      rev = 11 - (add % 11);
-      if (rev == 10 || rev == 11)
-        rev = 0;
-      if (rev != parseInt(cpf.charAt(10)))
-        return false;
-      return true;
-    }
-
-    $(document).ready(function () {
-      $('#cpf').mask('000.000.000-00');
-      $('form').on('submit', function (event) {
-        const cpf = $('#cpf').val();
-        if (!validarCPF(cpf)) {
-          alert('CPF inválido!');
-          event.preventDefault();
-        }
-      });
-    });
-  </script>
   <script>
     $(document).ready(function () {
       // Máscara para CPF

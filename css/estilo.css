@@ -21,7 +21,7 @@ table.darkTable {
   }
   table.darkTable tbody td {
     font-size: 14px;
-    color: #FFFFFF;
+    color: #000000;
   }
   table.darkTable tr:nth-child(even) {
     background: #6A6A6A;

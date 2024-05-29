@@ -18,7 +18,7 @@
   <link rel="stylesheet" href="css/estilo.css">
 </head>
 
-<body onload="verificaLogado()">
+<body onload="verificaLogado(); obtemServico();carregaClientes()">
   <!-- Barra de Navegação -->
   <nav class="navbar navbar-expand-lg bg-body-tertiary">
     <div class="container-fluid">
@@ -78,13 +78,14 @@
             <form class="form-horizontal" id="formOrcamento">
               <!-- Código -->
               <div>
-                <input type="text" class="form-control" id="codigo" placeholder="Código do serviço" disabled readonly>
-                <label for="codigo"></label>
+                <input type="text" class="form-control" id="id" placeholder="Código do serviço" disabled readonly>
+                <label for="id"></label>
               </div>
               <!-- Placa -->
               <div class="form-floating mb-2">
-                <input type="text" class="form-control" id="placa" placeholder="AAA-0000" pattern="[A-Za-z]{3}-\d{4}"
-                  maxlength="8" required>
+                <select name="placa" id="placa" class="form-control">
+
+                </select>
                 <label for="placa">Placa do Veículo</label>
               </div>
               <!-- Carro -->
@@ -101,55 +102,77 @@
               <div class="form-group">
                 <label for="data">Data do serviço</label>
                 <input type="date" class="form-control" id="data" placeholder="dd/mm/aaaa" required>
-            </div>
+              </div>
+              <!-- Select de Serviços -->
+              <select class="form-select mt-2" id="servicos" name="servicos" aria-label="servicos">
+                <option selected disabled>Selecione um serviço</option>
+                <option value="Troca de Óleo">Troca de Óleo</option>
+                <option value="Mão de Obra">Mão de Obra</option>
+                <option value="Revisão">Revisão</option>
+                <option value="Troca jogo de vela">Troca jogo de vela</option>
+                <option value="Limpeza de bico">Limpeza de bico</option>
+                <option value="Troca pastilha">Troca de Pastilha</option>
+              </select>
+              <button type="button" id="inserirServ" name="inserirServ" class="btn btn-secondary mb-2 mt-2"><i class="bi bi-plus"></i>
+                Inserir</button>
+              <!-- Campo dos serviços realizados -->
+              <div class="form">
+                <label for="servicosRealizados" class="form-label">Serviços realizados</label>
+                <textarea class="form-control" id="servicosRealizados" rows="3"></textarea>
+              </div>
+              <!-- Valor do Serviço -->
+              <div class="input-group mb-2 mt-2">
+                <span class="input-group-text">R$</span>
+                <input type="number" class="form-control" aria-label="Amount (to the nearest dollar)" id="valorServico"
+                  placeholder="Valor do serviço" min="0.01" step="0.01">
+              </div>
 
-            <!-- Descrição do Serviço -->
-            <div class="mb-3">
-              <label for="descricao" class="form-label">Descrição do serviço</label>
-              <textarea class="form-control" id="descricaoServico" rows="3"></textarea>
-            </div>
+              <!-- Forma de Pgto -->
+              <select class="form-select" id="formaPgto" name="formaPgto" aria-label="formaPgto">
+                <option selected disabled>Forma de Pagamento</option>
+                <option value="Pix">À Vista - Pix</option>
+                <option value="Débito">À Vista - Débito</option>
+                <option value="1x - Crédito">1x - Crédito</option>
+                <option value="2x - Crédito">2x - Crédito</option>
+                <option value="3x - Crédito">3x - Crédito</option>
+                <option value="4x - Crédito">4x - Crédito</option>
+              </select>
 
-            <!-- Valor do Serviço -->
-            <div class="input-group mb-3">
-              <span class="input-group-text">R$</span>
-              <input type="number" class="form-control" aria-label="Amount (to the nearest dollar)" id="valorServico" placeholder="Valor do serviço" min="0.01" step="0.01">
-            </div>
-
-            <!-- Ckeckbox -->
-            <div class="form-check">
-              <input class="form-check-input" type="radio" name="statusServico" id="servicoAtivo" checked>
-              <label class="form-check-label" for="servicoAtivo">
-                Serviço em andamento
-              </label>
-            </div>
-            <div class="form-check">
-              <input class="form-check-input" type="radio" name="statusServico" id="carroEntregue">
-              <label class="form-check-label" for="carroEntregue">
-                Carro Entregue
-              </label>
-            </div> 
+              <!-- Ckeckbox -->
+              <div class="form-check mt-3">
+                <input class="form-check-input" type="radio" name="statusServico" id="servicoAtivo" value="Serviço em Andamento" checked>
+                <label class="form-check-label" for="Serviço em andamento">
+                  Serviço em andamento
+                </label>
+              </div>
+              <div class="form-check">
+                <input class="form-check-input" type="radio" name="statusServico" id="carroEntregue" value="Carro entregue">
+                <label class="form-check-label" for="Carro entregue">
+                  Carro Entregue
+                </label>
+              </div>
+              <!-- Botão Salvar e Limpar -->
+              <div class="form-group">
+                <label class="col-md-4 control-label" for="salvar"></label>
+                <div class="col-md-8">
+                  <button type="submit" id="salvar" name="salvar" class="btn btn-secondary"><i class="bi bi-save"></i>
+                    Salvar</button>
+                  <button type="reset" id="limpar" name="limpar" class="btn btn-warning"><i class="bi bi-x-circle"></i>
+                    Limpar</button>
+                </div>
+              </div>
             </form>
           </div>
-          <div class="form-group">
-            <label class="col-md-4 control-label" for="salvar"></label>
-            <div class="col-md-8">
-              <button type="submit" id="salvar" name="salvar" class="btn btn-secondary"><i class="bi bi-save"></i>
-                Salvar</button>
-              <button type="reset" id="limpar" name="limpar" class="btn btn-warning"><i class="bi bi-x-circle"></i>
-                Limpar</button>
-            </div>
-          </div>
-
         </div>
       </div>
       <div class="col-md-8">
-        <button class="btn btn-secondary" type="button"disabled id="carregandoServico">
+        <button class="btn btn-secondary" type="button" disabled id="carregandoServico">
           <span class="spinner-border spinner-border-sm text-dark" role="status"></span> Carregando os dados...
         </button>
         <!-- campo de filtro -->
         <div class="form-group mt-3">
           <input type="text" class="form-control" id="filtroCliente" placeholder="🔍 Filtrar..."
-            oninput="filtrarTabela('filtroCliente','tabelaDados')">
+            oninput="filtrarTabela('filtroCliente','tabelaServico')">
         </div>
         <!-- tabela -->
         <table class="table table-bordered table-striped darkTable" id="tabelaServico">
@@ -159,7 +182,7 @@
     </div>
   </div>
 
-  <footer class="bd-footer py-1 bg-secondary text-light fixed-bottom">
+  <footer class="bd-footer py-1 bg-secondary text-light">
     <div class="container py-1">
       <div class="row">
         <div class="col-md-6">
