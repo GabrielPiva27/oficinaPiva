@@ -62,6 +62,7 @@ async function alterar(event, collection, dados, id) {
             alerta('<i class="bi bi-x-circle"></i> Falha ao alterar: ' + error.message, 'danger');
         });
 }
+
 //Tabela
 async function obtemServico() {
     let spinner = document.getElementById('carregandoServico');
@@ -170,7 +171,6 @@ async function carregaDadosAlteracao(db, id) {
     }
 }
 
-
 //Função Filtro
 function filtrarTabela(idFiltro, idTabela) {
     // Obtém os elementos HTML
@@ -245,7 +245,6 @@ document.getElementById('inserirServ').addEventListener('click', function () {
         textarea.value = textarea.value ? `${textarea.value.trim()}\n${selectedService}` : selectedService;
     }
 });
-
 
 document.getElementById('inserirServ').addEventListener('click', function () {
     const select = document.getElementById('servicos');
