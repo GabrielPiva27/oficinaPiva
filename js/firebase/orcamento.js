@@ -1,61 +1,67 @@
-document.getElementById('formOrcamento').addEventListener('submit', function (event) {
-    event.preventDefault();
+document.getElementById('formOrcamento')
+    .addEventListener('submit', function (event) {
+        event.preventDefault();
+        
+        let statusServico = '';
+        if (document.getElementById('servicoAtivo').checked) {
+            statusServico = 'Serviço em andamento';
+        } else {
+            statusServico = 'Carro entregue';
+        }
 
-    let statusServico = document.getElementById('servicoAtivo').checked ? 'Serviço em andamento' : 'Carro entregue';
+        // Pegando os serviços do textarea
+        const servicesContainer = document.getElementById('servicosRealizados');
+        let servicosRealizados = [];
+        servicesContainer.childNodes.forEach(child => {
+            if (child.className === 'service-item') {
+                servicosRealizados.push(child.firstChild.textContent.trim());
+            }
+        });
 
-    const dadosServico = {
-        placa: document.getElementById('placa').value.trim(),
-        carro: document.getElementById('carro').value.trim(),
-        nome: document.getElementById('nome').value.trim(),
-        data: document.getElementById('data').value.trim(),
-        servicosRealizados: document.getElementById('servicosRealizados').value.trim(),
-        valorServico: document.getElementById('valorServico').value.trim(),
-        servico: statusServico
-    };
+        const dadosServico = {
+            placa: document.getElementById('placa').value,
+            carro: document.getElementById('carro').value,
+            nome: document.getElementById('nome').value,
+            data: document.getElementById('data').value,
+            servicosRealizados: servicosRealizados.join('\n'),
+            valorServico: document.getElementById('valorServico').value,
+            servico: statusServico
+        };
 
-    if (Object.values(dadosServico).includes('')) {
-        alerta('<i class="bi bi-x-circle"></i> Preencha todos os campos corretamente.', 'danger');
-        return;
-    }
-
-    if (document.getElementById('id').value !== '') {
-        alterar(event, 'orcamentos', dadosServico, document.getElementById('id').value);
-    } else {
-        incluir(event, 'orcamentos', dadosServico);
-    }
-});
-
+        if (document.getElementById('id').value !== '') {
+            alterar(event, 'orcamentos', dadosServico, document.getElementById('id').value);
+        } else {
+            incluir(event, 'orcamentos', dadosServico);
+        }
+    });
 
 //Botão de salvar
 async function incluir(event, collection, dados) {
     event.preventDefault();
-
-    try {
-        await firebase.database().ref(collection).push(dados);
-        alerta('<i class="bi bi-check-circle"></i> Serviço incluído com sucesso!', 'success');
-        document.getElementById('formOrcamento').reset();
-        document.getElementById('servicosRealizados').value = '';  // Resetar o campo de serviços realizados
-        document.getElementById('servicosRealizados').innerHTML = '';  // Se estiver usando um elemento div ou similar
-    } catch (error) {
-        alerta('<i class="bi bi-x-circle"></i> Falha ao incluir: ' + error.message, 'danger');
-    }
+    return await firebase.database().ref(collection).push(dados)
+        .then(() => {
+            alerta('<i class="bi bi-check-circle"></i> Serviço incluído com sucesso!', 'success');
+            document.getElementById('formOrcamento').reset();
+            document.getElementById('servicosRealizados').innerHTML = ''; // Limpa o textarea
+        })
+        .catch(error => {
+            alerta('<i class="bi bi-x-circle"></i> Falha ao incluir: ' + error.message, 'danger');
+        });
 }
 
 //Botão de editar
 async function alterar(event, collection, dados, id) {
     event.preventDefault();
-
-    try {
-        await firebase.database().ref().child(collection + '/' + id).update(dados);
-        alerta('<i class="bi bi-check-circle"></i> Serviço alterado com sucesso!', 'success');
-        document.getElementById('formOrcamento').reset();
-        document.getElementById('servicosRealizados').value = '';  // Resetar o campo de serviços realizados
-        document.getElementById('servicosRealizados').innerHTML = '';  // Se estiver usando um elemento div ou similar
-    } catch (error) {
-        alerta('<i class="bi bi-x-circle"></i> Falha ao alterar: ' + error.message, 'danger');
-    }
+    return await firebase.database().ref().child(collection + '/' + id).update(dados)
+        .then(() => {
+            alerta('<i class="bi bi-check-circle"></i> Serviço alterado com sucesso!', 'success');
+            document.getElementById('formOrcamento').reset();
+            document.getElementById('servicosRealizados').innerHTML = ''; // Limpa o textarea
+        })
+        .catch(error => {
+            alerta('<i class="bi bi-x-circle"></i> Falha ao alterar: ' + error.message, 'danger');
+        });
 }
-
 //Tabela
 async function obtemServico() {
     let spinner = document.getElementById('carregandoServico');
@@ -127,16 +133,10 @@ async function carregaDadosAlteracao(db, id) {
             document.getElementById('data').value = data.data || '';
             document.getElementById('valorServico').value = data.valorServico || '';
 
-            // Log para verificar o valor de servicosRealizados
-            console.log('Serviços Realizados:', data.servicosRealizados);
-
             // Atualizando o campo servicosRealizados com os botões e mesmo formato
-            const textarea = document.getElementById('servicosRealizados');
-            if (textarea) {
-                console.log('Textarea encontrado:', textarea);
-                // Limpando o conteúdo atual
-                textarea.innerHTML = '';
-                // Separando os serviços e criando os botões para cada um
+            const servicesContainer = document.getElementById('servicosRealizados');
+            if (servicesContainer) {
+                servicesContainer.innerHTML = '';
                 const servicos = (data.servicosRealizados || '').split('\n').filter(Boolean);
                 servicos.forEach(servico => {
                     const serviceItem = document.createElement('div');
@@ -146,15 +146,13 @@ async function carregaDadosAlteracao(db, id) {
                     const deleteButton = document.createElement('button');
                     deleteButton.className = 'btn btn-danger btn-sm';
                     deleteButton.textContent = ' ❌';
-                    deleteButton.onclick = function() {
+                    deleteButton.onclick = function () {
                         serviceItem.remove();
                     };
                     serviceItem.appendChild(serviceText);
                     serviceItem.appendChild(deleteButton);
-                    textarea.appendChild(serviceItem);
+                    servicesContainer.appendChild(serviceItem);
                 });
-            } else {
-                console.error('Campo servicosRealizados não encontrado.');
             }
 
             if (data.servico === 'Serviço em andamento') {
@@ -163,7 +161,6 @@ async function carregaDadosAlteracao(db, id) {
                 document.getElementById('carroEntregue').checked = true;
             }
 
-            // Foco no campo placa
             document.getElementById('placa').focus();
         } else {
             console.error('Nenhum dado encontrado para o ID fornecido.');
