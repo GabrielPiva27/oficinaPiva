@@ -81,6 +81,7 @@
                 <input type="text" class="form-control" id="id" placeholder="Código do serviço" disabled readonly>
                 <label for="id"></label>
               </div>
+
               <!-- Placa -->
               <div class="form-floating mb-2">
                 <select name="placa" id="placa" class="form-control" required>
@@ -88,38 +89,45 @@
                 </select>
                 <label for="placa">Placa do Veículo</label>
               </div>
+
               <!-- Carro -->
               <div class="form-floating mb-2">
                 <input type="text" class="form-control" id="carro" placeholder="Carro" readonly>
                 <label for="carro">Carro</label>
               </div>
+
               <!-- Nome -->
               <div class="form-floating mb-2">
                 <input type="text" class="form-control" id="nome" placeholder="Nome" readonly>
                 <label for="nome">Nome</label>
               </div>
+
               <!-- Data -->
               <div class="form-group">
                 <label for="data">Data do serviço</label>
                 <input type="date" class="form-control" id="data" placeholder="dd/mm/aaaa" required>
               </div>
+
               <!-- Select de Serviços -->
               <select class="form-select mt-2" id="servicos" name="servicos" aria-label="servicos">
                 <option selected disabled>Selecione um serviço</option>
                 <option value="Troca de Óleo">Troca de Óleo</option>
-                <option value="Mão de Obra">Mão de Obra</option>
+                <option value="Troca de filtro">Troca de Filtro</option>
                 <option value="Revisão">Revisão</option>
                 <option value="Troca jogo de vela">Troca jogo de vela</option>
                 <option value="Limpeza de bico">Limpeza de bico</option>
                 <option value="Troca pastilha">Troca de Pastilha</option>
               </select>
-              <button type="button" id="inserirServ" name="inserirServ" class="btn btn-secondary mb-2 mt-2"><i class="bi bi-plus"></i>
-                Inserir</button>
+              <button type="button" id="inserirServ" name="inserirServ" class="btn btn-secondary mb-2 mt-2">
+                <i class="bi bi-plus"></i> Inserir
+              </button>
+
               <!-- Campo dos serviços realizados -->
               <div class="form">
                 <label for="servicosRealizados" class="form-label">Serviços realizados</label>
-                <textarea class="form-control" id="servicosRealizados" rows="3"></textarea>
+                <div id="servicosRealizados" class="form-control" style="height: auto;"></div>
               </div>
+
               <!-- Valor do Serviço -->
               <div class="input-group mb-2 mt-2">
                 <span class="input-group-text">R$</span>
@@ -140,13 +148,15 @@
 
               <!-- Ckeckbox -->
               <div class="form-check mt-3">
-                <input class="form-check-input" type="radio" name="statusServico" id="servicoAtivo" value="Serviço em Andamento" checked>
+                <input class="form-check-input" type="radio" name="statusServico" id="servicoAtivo"
+                  value="Serviço em Andamento" checked>
                 <label class="form-check-label" for="Serviço em andamento">
                   Serviço em andamento
                 </label>
               </div>
               <div class="form-check">
-                <input class="form-check-input" type="radio" name="statusServico" id="carroEntregue" value="Carro entregue">
+                <input class="form-check-input" type="radio" name="statusServico" id="carroEntregue"
+                  value="Carro entregue">
                 <label class="form-check-label" for="Carro entregue">
                   Carro Entregue
                 </label>

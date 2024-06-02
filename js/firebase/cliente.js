@@ -1,28 +1,28 @@
 document.getElementById('formCliente')
-  .addEventListener('submit', function (event) {
-    event.preventDefault()
-    // validações
+  .addEventListener('submit', async function (event) {
+    event.preventDefault();
+
+    // Validações
     if (document.getElementById('nome').value.length < 5) {
-      alerta('<i class="bi bi-exclamation-circle"></i> O nome é muito curto!', 'warning')
-      document.getElementById('nome').focus()
-      return false
+      alerta('<i class="bi bi-exclamation-circle"></i> O nome é muito curto!', 'warning');
+      document.getElementById('nome').focus();
+      return false;
     } else if (document.getElementById('nome').value.length > 100) {
-      alerta('<i class="bi bi-exclamation-circle"></i> O nome é muito longo!', 'warning')
-      document.getElementById('nome').focus()
-      return false
+      alerta('<i class="bi bi-exclamation-circle"></i> O nome é muito longo!', 'warning');
+      document.getElementById('nome').focus();
+      return false;
     }
     if (document.getElementById('anoCarro').value > 2025) {
-      alerta('<i class="bi bi-exclamation-circle"></i> Favor inserir um ano válido!', 'warning')
-      document.getElementById('anoCarro').focus()
-      return false
+      alerta('<i class="bi bi-exclamation-circle"></i> Favor inserir um ano válido!', 'warning');
+      document.getElementById('anoCarro').focus();
+      return false;
     } else if (document.getElementById('anoCarro').value < 1950) {
-      alerta('<i class="bi bi-exclamation-circle"></i> Favor inserir um ano válido!', 'warning')
-      document.getElementById('anoCarro').focus()
-      return false
+      alerta('<i class="bi bi-exclamation-circle"></i> Favor inserir um ano válido!', 'warning');
+      document.getElementById('anoCarro').focus();
+      return false;
     }
-    
-    //criando o objeto cliente
 
+    // Criando o objeto cliente
     const dadosCliente = {
       placa: document.getElementById('placa').value,
       carro: document.getElementById('carro').value,
@@ -31,26 +31,41 @@ document.getElementById('formCliente')
       cpf: document.getElementById('cpf').value,
       email: document.getElementById('email').value,
       telefone: document.getElementById('telefone').value
-    }
+    };
 
     if (document.getElementById('id').value !== '') {
-      alterar(event, 'clientes', dadosCliente, document.getElementById('id').value)
+      alterar(event, 'clientes', dadosCliente, document.getElementById('id').value);
     } else {
-      incluir(event, 'clientes', dadosCliente)
+      await verificarPlacaExistente(event, 'clientes', dadosCliente);
     }
-  })
+  });
 
-//Salvar
+// Função para verificar se a placa já existe
+async function verificarPlacaExistente(event, collection, dadosCliente) {
+  const placa = dadosCliente.placa;
+  
+  const snapshot = await firebase.database().ref(collection)
+    .orderByChild('placa')
+    .equalTo(placa)
+    .once('value');
+
+  if (snapshot.exists()) {
+    alerta('<i class="bi bi-exclamation-circle"></i> Placa já cadastrada!', 'warning');
+  } else {
+    incluir(event, collection, dadosCliente);
+  }
+}
+
+// Função para incluir o cliente
 async function incluir(event, collection, dados) {
-  event.preventDefault()
   return await firebase.database().ref(collection).push(dados)
     .then(() => {
-      alerta('<i class="bi bi-check-circle"></i> Cliente incluído com sucesso!', 'success')
-      document.getElementById('formCliente').reset()
+      alerta('<i class="bi bi-check-circle"></i> Cliente incluído com sucesso!', 'success');
+      document.getElementById('formCliente').reset();
     })
     .catch(error => {
-      alerta('<i class="bi bi-exclamation-circle"></i> Falha ao incluir: ' + error.message, 'danger')
-    })
+      alerta('<i class="bi bi-exclamation-circle"></i> Falha ao incluir: ' + error.message, 'danger');
+    });
 }
 
 //Editar

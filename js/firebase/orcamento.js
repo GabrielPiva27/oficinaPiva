@@ -79,7 +79,13 @@ async function obtemServico() {
             novaLinha.insertCell().textContent = item.val().carro
             novaLinha.insertCell().textContent = item.val().nome
             novaLinha.insertCell().textContent = item.val().data
-            novaLinha.insertCell().textContent = item.val().servicosRealizados
+            //Serviços
+            const servicos = item.val().servicosRealizados.split('\n').filter(Boolean); // Removendo itens vazios
+            const servicosCell = novaLinha.insertCell();
+            servicos.forEach(servico => {
+                servicosCell.innerHTML += `${servico}<br>`;
+            });
+
             novaLinha.insertCell().textContent = item.val().valorServico
             novaLinha.insertCell().textContent = item.val().servico
             novaLinha.insertCell().innerHTML = `<button class='btn btn-sm btn-danger' title='Apaga o cliente selecionado' onclick=remover('${db}','${id}')> <i class='bi bi-trash'></i> </button>
@@ -194,51 +200,26 @@ document.getElementById('inserirServ').addEventListener('click', function () {
 });
 
 document.getElementById('inserirServ').addEventListener('click', function() {
-    var selectedValue = document.getElementById('servicos').value;
-    var container = document.getElementById('listaServicos');
-    
-    // Cria um novo div para armazenar o serviço e o botão de apagar
-    var newDiv = document.createElement('div');
-    newDiv.classList.add('input-group', 'mb-2');
+    const select = document.getElementById('servicos');
+    const selectedService = select.options[select.selectedIndex].text;
 
-    // Cria um input text para mostrar o serviço selecionado
-    var newText = document.createElement('input');
-    newText.type = 'text';
-    newText.classList.add('form-control');
-    newText.value = selectedValue;
-    newText.readOnly = true;
-
-    // Cria um botão de apagar
-    var deleteButton = document.createElement('button');
-    deleteButton.classList.add('btn', 'btn-danger');
-    deleteButton.textContent = 'Apagar';
-    deleteButton.addEventListener('click', function() {
-      container.removeChild(newDiv);
-    });
-
-    // Agrupa o botão de apagar com o input text
-    var inputGroupAppend = document.createElement('div');
-    inputGroupAppend.classList.add('input-group-append');
-    inputGroupAppend.appendChild(deleteButton);
-
-    // Adiciona o input text e o grupo de botões ao div
-    newDiv.appendChild(newText);
-    newDiv.appendChild(inputGroupAppend);
-    container.appendChild(newDiv);
-  });
-
-  // Salvar opções no textarea
-  document.getElementById('inserirServ').addEventListener('click', function() {
-    var container = document.getElementById('listaServicos');
-    var inputs = container.getElementsByTagName('input');
-    var resultTextarea = document.getElementById('servicosRealizados');
-    var values = [];
-
-    // Coleta todos os valores dos inputs e os adiciona ao array
-    for (var i = 0; i < inputs.length; i++) {
-      values.push(inputs[i].value);
+    if (selectedService !== 'Selecione um serviço') {
+      const serviceItem = document.createElement('div');
+      serviceItem.className = 'service-item';
+      
+      const serviceText = document.createElement('span');
+      serviceText.textContent = selectedService;
+      
+      const deleteButton = document.createElement('button');
+      deleteButton.className = 'btn btn-danger btn-sm';
+      deleteButton.textContent = ' ❌';
+      deleteButton.onclick = function() {
+        serviceItem.remove();
+      };
+      
+      serviceItem.appendChild(serviceText);
+      serviceItem.appendChild(deleteButton);
+      
+      document.getElementById('servicosRealizados').appendChild(serviceItem);
     }
-
-    // Adiciona os valores ao textarea, cada um em uma nova linha
-    resultTextarea.value = values.join('\n');
   });
