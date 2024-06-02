@@ -1,65 +1,69 @@
-document.getElementById('formOrcamento')
-    .addEventListener('submit', function (event) {
-        event.preventDefault()
-        //validações
-        
-        let statusServico = ''
-        if (document.getElementById('servicoAtivo').checked) {
-            statusServico = 'Serviço em andamento'
-        } else { statusServico = 'Carro entregue' }
+document.getElementById('formOrcamento').addEventListener('submit', function (event) {
+    event.preventDefault();
 
-        const dadosServico = {
-            placa: document.getElementById('placa').value,
-            carro: document.getElementById('carro').value,
-            nome: document.getElementById('nome').value,
-            data: document.getElementById('data').value,
-            servicosRealizados: document.getElementById('servicosRealizados').value,
-            valorServico: document.getElementById('valorServico').value,
-            servico: statusServico
-        }
+    let statusServico = document.getElementById('servicoAtivo').checked ? 'Serviço em andamento' : 'Carro entregue';
 
-        if (document.getElementById('id').value !== '') {
-            alterar(event, 'orcamentos', dadosServico, document.getElementById('id').value)
-        } else {
-            incluir(event, 'orcamentos', dadosServico)
-        }
-    })
+    const dadosServico = {
+        placa: document.getElementById('placa').value.trim(),
+        carro: document.getElementById('carro').value.trim(),
+        nome: document.getElementById('nome').value.trim(),
+        data: document.getElementById('data').value.trim(),
+        servicosRealizados: document.getElementById('servicosRealizados').value.trim(),
+        valorServico: document.getElementById('valorServico').value.trim(),
+        servico: statusServico
+    };
+
+    if (Object.values(dadosServico).includes('')) {
+        alerta('<i class="bi bi-x-circle"></i> Preencha todos os campos corretamente.', 'danger');
+        return;
+    }
+
+    if (document.getElementById('id').value !== '') {
+        alterar(event, 'orcamentos', dadosServico, document.getElementById('id').value);
+    } else {
+        incluir(event, 'orcamentos', dadosServico);
+    }
+});
+
 
 //Botão de salvar
 async function incluir(event, collection, dados) {
-    event.preventDefault()
-    return await firebase.database().ref(collection).push(dados)
-        .then(() => {
-            alerta('<i class="bi bi-check-circle"></i> Serviço incluído com sucesso!', 'success')
-            document.getElementById('formOrcamento').reset()
-        })
-        .catch(error => {
-            alerta('<i class="bi bi-x-circle"></i> Falha ao incluir: ' + error.message, 'danger')
-        })
+    event.preventDefault();
+
+    try {
+        await firebase.database().ref(collection).push(dados);
+        alerta('<i class="bi bi-check-circle"></i> Serviço incluído com sucesso!', 'success');
+        document.getElementById('formOrcamento').reset();
+        document.getElementById('servicosRealizados').value = '';  // Resetar o campo de serviços realizados
+        document.getElementById('servicosRealizados').innerHTML = '';  // Se estiver usando um elemento div ou similar
+    } catch (error) {
+        alerta('<i class="bi bi-x-circle"></i> Falha ao incluir: ' + error.message, 'danger');
+    }
 }
 
 //Botão de editar
 async function alterar(event, collection, dados, id) {
-    event.preventDefault()
-    return await firebase.database().ref().child(collection + '/' + id).update(dados)
-        .then(() => {
-            alerta('<i class="bi bi-check-circle"></i> Serviço alterado com sucesso!', 'success')
-            document.getElementById('formOrcamento').reset()
-        })
-        .catch(error => {
-            alerta('<i class="bi bi-x-circle"></i> Falha ao alterar: ' + error.message, 'danger')
-        })
+    event.preventDefault();
+
+    try {
+        await firebase.database().ref().child(collection + '/' + id).update(dados);
+        alerta('<i class="bi bi-check-circle"></i> Serviço alterado com sucesso!', 'success');
+        document.getElementById('formOrcamento').reset();
+        document.getElementById('servicosRealizados').value = '';  // Resetar o campo de serviços realizados
+        document.getElementById('servicosRealizados').innerHTML = '';  // Se estiver usando um elemento div ou similar
+    } catch (error) {
+        alerta('<i class="bi bi-x-circle"></i> Falha ao alterar: ' + error.message, 'danger');
+    }
 }
 
 //Tabela
 async function obtemServico() {
-    let spinner = document.getElementById('carregandoServico')
-    let tabela = document.getElementById('tabelaServico')
+    let spinner = document.getElementById('carregandoServico');
+    let tabela = document.getElementById('tabelaServico');
 
     await firebase.database().ref('orcamentos').orderByChild('placa').on('value', (snapshot) => {
-        tabela.innerHTML = ''
-        tabela.innerHTML += `
-              <tr class='darkTable'>
+        tabela.innerHTML = `
+            <tr class='darkTable'>
                 <th>Placa</th>
                 <th>Carro</th>
                 <th>Nome</th>
@@ -67,33 +71,34 @@ async function obtemServico() {
                 <th>Serviços Realizados</th>
                 <th>Valor Total</th>
                 <th>Status do Serviço</th>
-              </tr>
-      `
+            </tr>
+        `;
         snapshot.forEach(item => {
-            //Dados do Firebase
-            let db = item.ref._delegate._path.pieces_[0] //nome da collection
-            let id = item.ref._delegate._path.pieces_[1] //id do registro
-            //Criando as novas linhas da tabela
-            let novaLinha = tabela.insertRow() //insere uma nova linha na tabela
-            novaLinha.insertCell().textContent = item.val().placa
-            novaLinha.insertCell().textContent = item.val().carro
-            novaLinha.insertCell().textContent = item.val().nome
-            novaLinha.insertCell().textContent = item.val().data
-            //Serviços
-            const servicos = item.val().servicosRealizados.split('\n').filter(Boolean); // Removendo itens vazios
-            const servicosCell = novaLinha.insertCell();
-            servicos.forEach(servico => {
-                servicosCell.innerHTML += `${servico}<br>`;
-            });
+            // Dados do Firebase
+            let db = item.ref._delegate._path.pieces_[0]; // nome da collection
+            let id = item.ref._delegate._path.pieces_[1]; // id do registro
 
-            novaLinha.insertCell().textContent = item.val().valorServico
-            novaLinha.insertCell().textContent = item.val().servico
+            // Criando as novas linhas da tabela
+            let novaLinha = tabela.insertRow(); // insere uma nova linha na tabela
+            novaLinha.insertCell().textContent = item.val().placa;
+            novaLinha.insertCell().textContent = item.val().carro;
+            novaLinha.insertCell().textContent = item.val().nome;
+            novaLinha.insertCell().textContent = item.val().data;
+
+            // Serviços
+            const servicos = item.val().servicosRealizados.split('\n').filter(servico => servico.trim() !== ''); // Remover itens vazios e espaços em branco
+            const servicosCell = novaLinha.insertCell();
+            servicosCell.innerHTML = servicos.join('<br>'); // Unir os serviços em uma única string com quebras de linha
+
+            novaLinha.insertCell().textContent = item.val().valorServico;
+            novaLinha.insertCell().textContent = item.val().servico;
             novaLinha.insertCell().innerHTML = `<button class='btn btn-sm btn-danger' title='Apaga o cliente selecionado' onclick=remover('${db}','${id}')> <i class='bi bi-trash'></i> </button>
-                                                <button class='btn btn-sm btn-warning' title='Edita o cliente selecionado' onclick=carregaDadosAlteracao('${db}','${id}')> <i class='bi bi-pencil-square'></i> </button>`
-        })
-    })
-    spinner.classList.add('d-none')
+                                                <button class='btn btn-sm btn-warning' title='Edita o cliente selecionado' onclick=carregaDadosAlteracao('${db}','${id}')> <i class='bi bi-pencil-square'></i> </button>`;
+        });
+    });
+    spinner.classList.add('d-none');
 }
+
 
 //Apagar
 async function remover(db, id) {
@@ -111,22 +116,63 @@ async function remover(db, id) {
 
 //editar
 async function carregaDadosAlteracao(db, id) {
-    await firebase.database().ref(db + '/' + id).on('value', (snapshot) => {
-        document.getElementById('id').value = id
-        document.getElementById('placa').value = snapshot.val().placa
-        document.getElementById('carro').value = snapshot.val().carro
-        document.getElementById('nome').value = snapshot.val().nome
-        document.getElementById('data').value = snapshot.val().data
-        document.getElementById('servicosRealizados').value = snapshot.val().servicosRealizados
-        document.getElementById('valorServico').value = snapshot.val().valorServico
-        if (snapshot.val().servico === 'Serviço em andamento') {
-            document.getElementById('servicoAtivo').checked = true
-          } else {
-            document.getElementById('carroEntregue').checked = true
-          }
-    })
-    document.getElementById('placa').focus() //Foco no campo placa
+    try {
+        const snapshot = await firebase.database().ref(db + '/' + id).once('value');
+        if (snapshot.exists()) {
+            const data = snapshot.val();
+            document.getElementById('id').value = id;
+            document.getElementById('placa').value = data.placa || '';
+            document.getElementById('carro').value = data.carro || '';
+            document.getElementById('nome').value = data.nome || '';
+            document.getElementById('data').value = data.data || '';
+            document.getElementById('valorServico').value = data.valorServico || '';
+
+            // Log para verificar o valor de servicosRealizados
+            console.log('Serviços Realizados:', data.servicosRealizados);
+
+            // Atualizando o campo servicosRealizados com os botões e mesmo formato
+            const textarea = document.getElementById('servicosRealizados');
+            if (textarea) {
+                console.log('Textarea encontrado:', textarea);
+                // Limpando o conteúdo atual
+                textarea.innerHTML = '';
+                // Separando os serviços e criando os botões para cada um
+                const servicos = (data.servicosRealizados || '').split('\n').filter(Boolean);
+                servicos.forEach(servico => {
+                    const serviceItem = document.createElement('div');
+                    serviceItem.className = 'service-item';
+                    const serviceText = document.createElement('span');
+                    serviceText.textContent = servico;
+                    const deleteButton = document.createElement('button');
+                    deleteButton.className = 'btn btn-danger btn-sm';
+                    deleteButton.textContent = ' ❌';
+                    deleteButton.onclick = function() {
+                        serviceItem.remove();
+                    };
+                    serviceItem.appendChild(serviceText);
+                    serviceItem.appendChild(deleteButton);
+                    textarea.appendChild(serviceItem);
+                });
+            } else {
+                console.error('Campo servicosRealizados não encontrado.');
+            }
+
+            if (data.servico === 'Serviço em andamento') {
+                document.getElementById('servicoAtivo').checked = true;
+            } else {
+                document.getElementById('carroEntregue').checked = true;
+            }
+
+            // Foco no campo placa
+            document.getElementById('placa').focus();
+        } else {
+            console.error('Nenhum dado encontrado para o ID fornecido.');
+        }
+    } catch (error) {
+        console.error('Erro ao carregar dados para alteração:', error);
+    }
 }
+
 
 //Função Filtro
 function filtrarTabela(idFiltro, idTabela) {
@@ -194,32 +240,37 @@ async function carregaClientePorPlaca(placa) {
 
 //Adicionar o serviço
 document.getElementById('inserirServ').addEventListener('click', function () {
-    var servicoUsado = document.getElementById('servicos').value;
-    var textarea = document.getElementById('servicosRealizados');
-    textarea.value += (textarea.value ? '\n' : '') + servicoUsado;
-});
-
-document.getElementById('inserirServ').addEventListener('click', function() {
     const select = document.getElementById('servicos');
     const selectedService = select.options[select.selectedIndex].text;
 
     if (selectedService !== 'Selecione um serviço') {
-      const serviceItem = document.createElement('div');
-      serviceItem.className = 'service-item';
-      
-      const serviceText = document.createElement('span');
-      serviceText.textContent = selectedService;
-      
-      const deleteButton = document.createElement('button');
-      deleteButton.className = 'btn btn-danger btn-sm';
-      deleteButton.textContent = ' ❌';
-      deleteButton.onclick = function() {
-        serviceItem.remove();
-      };
-      
-      serviceItem.appendChild(serviceText);
-      serviceItem.appendChild(deleteButton);
-      
-      document.getElementById('servicosRealizados').appendChild(serviceItem);
+        const textarea = document.getElementById('servicosRealizados');
+        textarea.value = textarea.value ? `${textarea.value.trim()}\n${selectedService}` : selectedService;
     }
-  });
+});
+
+
+document.getElementById('inserirServ').addEventListener('click', function () {
+    const select = document.getElementById('servicos');
+    const selectedService = select.options[select.selectedIndex].text;
+
+    if (selectedService !== 'Selecione um serviço') {
+        const serviceItem = document.createElement('div');
+        serviceItem.className = 'service-item';
+
+        const serviceText = document.createElement('span');
+        serviceText.textContent = selectedService;
+
+        const deleteButton = document.createElement('button');
+        deleteButton.className = 'btn btn-danger btn-sm';
+        deleteButton.textContent = ' ❌';
+        deleteButton.onclick = function () {
+            serviceItem.remove();
+        };
+
+        serviceItem.appendChild(serviceText);
+        serviceItem.appendChild(deleteButton);
+
+        document.getElementById('servicosRealizados').appendChild(serviceItem);
+    }
+});
