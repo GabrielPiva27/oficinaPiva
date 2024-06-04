@@ -1,4 +1,10 @@
 document.getElementById('formOrcamento')
+    .addEventListener('reset', function (event) {
+        // Limpa o campo de serviços realizados
+        document.getElementById('servicosRealizados').innerHTML = '';
+    });
+
+document.getElementById('formOrcamento')
     .addEventListener('submit', function (event) {
         event.preventDefault();
         
@@ -25,6 +31,7 @@ document.getElementById('formOrcamento')
             data: document.getElementById('data').value,
             servicosRealizados: servicosRealizados.join('\n'),
             valorServico: document.getElementById('valorServico').value,
+            formaPgto: document.getElementById('formaPgto').value,
             servico: statusServico
         };
 
@@ -63,6 +70,12 @@ async function alterar(event, collection, dados, id) {
         });
 }
 
+//Função para configurar a data
+function formatarData(data) {
+    const [ano, mes, dia] = data.split('-');
+    return `${dia}/${mes}/${ano}`;
+}
+
 //Tabela
 async function obtemServico() {
     let spinner = document.getElementById('carregandoServico');
@@ -77,6 +90,7 @@ async function obtemServico() {
                 <th>Data</th>
                 <th>Serviços Realizados</th>
                 <th>Valor Total</th>
+                <th>Forma de Pagamento</th>
                 <th>Status do Serviço</th>
             </tr>
         `;
@@ -90,7 +104,7 @@ async function obtemServico() {
             novaLinha.insertCell().textContent = item.val().placa;
             novaLinha.insertCell().textContent = item.val().carro;
             novaLinha.insertCell().textContent = item.val().nome;
-            novaLinha.insertCell().textContent = item.val().data;
+            novaLinha.insertCell().textContent = formatarData(item.val().data); // Formata a data
 
             // Serviços
             const servicos = item.val().servicosRealizados.split('\n').filter(servico => servico.trim() !== ''); // Remover itens vazios e espaços em branco
@@ -98,6 +112,7 @@ async function obtemServico() {
             servicosCell.innerHTML = servicos.join('<br>'); // Unir os serviços em uma única string com quebras de linha
 
             novaLinha.insertCell().textContent = item.val().valorServico;
+            novaLinha.insertCell().textContent = item.val().formaPgto; // Certifique-se que o nome do campo no Firebase seja "formaPgto"
             novaLinha.insertCell().textContent = item.val().servico;
             novaLinha.insertCell().innerHTML = `<button class='btn btn-sm btn-danger' title='Apaga o cliente selecionado' onclick=remover('${db}','${id}')> <i class='bi bi-trash'></i> </button>
                                                 <button class='btn btn-sm btn-warning' title='Edita o cliente selecionado' onclick=carregaDadosAlteracao('${db}','${id}')> <i class='bi bi-pencil-square'></i> </button>`;
@@ -105,7 +120,6 @@ async function obtemServico() {
     });
     spinner.classList.add('d-none');
 }
-
 
 //Apagar
 async function remover(db, id) {
@@ -133,6 +147,7 @@ async function carregaDadosAlteracao(db, id) {
             document.getElementById('nome').value = data.nome || '';
             document.getElementById('data').value = data.data || '';
             document.getElementById('valorServico').value = data.valorServico || '';
+            document.getElementById('formaPgto').value = data.formaPgto || '';
 
             // Atualizando o campo servicosRealizados com os botões e mesmo formato
             const servicesContainer = document.getElementById('servicosRealizados');
